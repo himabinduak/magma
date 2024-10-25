@@ -118,7 +118,8 @@ jobs:
       - name: Download and upload missed Debian packages
         run: |
           
-          packages=("libsystemd-dev" "getenvoy-envoy" "td-agent-bit" "libczmq-dev")
+          
+          packages="libsystemd-dev getenvoy-envoy td-agent-bit libczmq-dev"
           
           # Update the package list
           sudo apt-get update
