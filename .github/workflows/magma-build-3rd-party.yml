@@ -117,25 +117,24 @@ jobs:
 
       - name: Download and upload missed Debian packages
         run: |
-          
-          
+          # Define the list of packages as a space-separated string
           packages="libsystemd-dev getenvoy-envoy td-agent-bit libczmq-dev"
-          
+    
           # Update the package list
           sudo apt-get update
-          
+    
           # Download each package and upload to JFrog
-          for package in "${packages[@]}"; do
-              sudo apt-get download "$package"
-              
-              # Attempt to upload the downloaded package to JFrog
-              deb_file="${package}_*.deb" # Assumes the downloaded file will follow this naming pattern
-              jf rt upload \
-                  --recursive=false \
-                  --detailed-summary \
-                  --target-props="deb.component=main;deb.distribution=${{ env.distribution }};" \
-                  "$deb_file" "${{ env.repository }}/pool/${{ env.distribution }}/" || echo "Warning: Failed to upload $deb_file for package $package."
+          for package in $packages; do
+          sudo apt-get download "$package"
+      
+          # Attempt to upload the downloaded package to JFrog
+          deb_file="${package}_*.deb" # Assumes the downloaded file will follow this naming pattern
+          jf rt upload \
+            --recursive=false \
+            --detailed-summary \
+            --target-props="deb.component=main;deb.distribution=$distribution;" \
+            "$deb_file" "$repository/pool/$distribution/" || echo "Warning: Failed to upload $deb_file for package $package."
           done
-          
-          # List the downloaded packages
-          ls
+    
+           # List the downloaded packages
+           ls
