@@ -129,6 +129,8 @@ jobs:
       
           # Attempt to upload the downloaded package to JFrog
           deb_file="${package}_*.deb" # Assumes the downloaded file will follow this naming pattern
+          jf c show 
+          ls -la
           jf rt upload \
             --recursive=false \
             --detailed-summary \
