@@ -131,14 +131,11 @@ jobs:
       
           # Attempt to upload the downloaded package to JFrog
           deb_file="${package}_*.deb" # Assumes the downloaded file will follow this naming pattern
-          jf c show 
           ls -la
-          jf rt upload \
-            --recursive=false \
-            --detailed-summary \
-            --target-props="deb.component=main;deb.distribution=$distribution;" \
-            "$deb_file" "$repository/pool/$distribution/" || echo "Warning: Failed to upload $deb_file for package $package."
+          jf c show
+          # jf rt upload \
+          #  --recursive=false \
+          #  --detailed-summary \
+          #  --target-props="deb.component=main;deb.distribution=$distribution;" \
+          #  "$deb_file" "$repository/pool/$distribution/" || echo "Warning: Failed to upload $deb_file for package $package."
           done
-    
-           # List the downloaded packages
-           ls
