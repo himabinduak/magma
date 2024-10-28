@@ -116,6 +116,8 @@ jobs:
             "(*${{ matrix.dependency }}*).deb" ${{ env.repository }}/pool/${{ env.distribution }}/{1}.deb
 
       - name: Download and upload missed Debian packages
+        working-directory: ${{ env.build-directory }}
+
         run: |
           # Define the list of packages as a space-separated string
           packages="libsystemd-dev getenvoy-envoy td-agent-bit libczmq-dev"
