@@ -25,6 +25,7 @@ on:
     branches:
       - master
       - 'v1.*'
+      - topic/himabindu/dockerimagespush
     types: [ opened, reopened, synchronize ]
 jobs:
   build_publish_helm_charts:
@@ -129,15 +130,25 @@ jobs:
         run: |
           cd ${MAGMA_ROOT}/orc8r/cloud/docker
           python3 build.py --all --nocache
+      # - name: Create and Push Release Tag
+      #   if: startsWith(github.ref,'refs/heads/v1')  
+      #   run: |
+      #     RELEASE_TAG="${GITHUB_REF_NAME}"
+      #     echo "Creating release tag for version ${RELEASE_TAG}"
+      #     echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+      # - name: Tag and push to Jfrog Registry
+      #   id: publish_artifacts
+      #   if: startsWith(github.ref,'refs/heads/v1')  
       - name: Create and Push Release Tag
-        if: startsWith(github.ref,'refs/heads/v1')  
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         run: |
           RELEASE_TAG="${GITHUB_REF_NAME}"
           echo "Creating release tag for version ${RELEASE_TAG}"
           echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+
       - name: Tag and push to Jfrog Registry
         id: publish_artifacts
-        if: startsWith(github.ref,'refs/heads/v1')  
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         env:
           DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-orc8r-test"
           DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
@@ -146,6 +157,14 @@ jobs:
           ./ci-scripts/tag-push-docker.sh --images 'nginx|controller' --tag "${TAG}" --tag-latest true --project orc8r
           ARTIFACTS="{\"packages\":[\"$DOCKER_REGISTRY/nginx:${TAG}\", \"$DOCKER_REGISTRY/controller:${TAG}\"],\"valid\":true}"
           echo "artifacts=$(echo $ARTIFACTS)" >> $GITHUB_OUTPUT
+        # env:
+        #   DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-orc8r-test"
+        #   DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
+        #   DOCKER_PASSWORD: "${{ secrets.LF_JFROG_PASSWORD }}"
+        # run: |
+        #   ./ci-scripts/tag-push-docker.sh --images 'nginx|controller' --tag "${TAG}" --tag-latest true --project orc8r
+        #   ARTIFACTS="{\"packages\":[\"$DOCKER_REGISTRY/nginx:${TAG}\", \"$DOCKER_REGISTRY/controller:${TAG}\"],\"valid\":true}"
+        #   echo "artifacts=$(echo $ARTIFACTS)" >> $GITHUB_OUTPUT
       - name: Notify failure to Slack
         if: failure() && github.event_name == 'push'
         uses: rtCamp/action-slack-notify@12e36fc18b0689399306c2e0b3e0f2978b7f1ee7 # pin@v2.2.0
@@ -261,23 +280,39 @@ jobs:
         with:
           name: pr
           path: pr/
+      # - name: Create and Push Release Tag
+      #   if: startsWith(github.ref, 'refs/heads/v1')  
+      #   run: |
+      #     RELEASE_TAG="${GITHUB_REF_NAME}"
+      #     echo "Creating release tag for version ${RELEASE_TAG}"
+      #     echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+      # - name: Tag and push to Jfrog Registry
+      #   id: publish_artifacts
+      #   if: startsWith(github.ref,'refs/heads/v1')
+      #   env:
+      #     DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-cwag-test"
+      #     DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
+      #     DOCKER_PASSWORD: "${{ secrets.LF_JFROG_PASSWORD }}"
+      
       - name: Create and Push Release Tag
-        if: startsWith(github.ref, 'refs/heads/v1')  
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         run: |
           RELEASE_TAG="${GITHUB_REF_NAME}"
           echo "Creating release tag for version ${RELEASE_TAG}"
           echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+
       - name: Tag and push to Jfrog Registry
         id: publish_artifacts
-        if: startsWith(github.ref,'refs/heads/v1')
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         env:
-          DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-cwag-test"
+          DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-orc8r-test"
           DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
           DOCKER_PASSWORD: "${{ secrets.LF_JFROG_PASSWORD }}"
         run: |
-          ./ci-scripts/tag-push-docker.sh --images 'cwag_go|gateway_go|gateway_python|gateway_sessiond|gateway_pipelined' --tag "${TAG}" --tag-latest true --project cwf
-          ARTIFACTS="{\"packages\":[\"$DOCKER_REGISTRY/cwag_go:${TAG}\", \"$DOCKER_REGISTRY/gateway_go:${TAG}\", \"$DOCKER_REGISTRY/gateway_python:${TAG}\", \"$DOCKER_REGISTRY/gateway_sessiond:${TAG}\",\"$DOCKER_REGISTRY/gateway_pipelined:${TAG}\"],\"valid\":true}"
-          echo "artifacts=$(echo $ARTIFACTS)" >> $GITHUB_OUTPUT
+           ./ci-scripts/tag-push-docker.sh --images 'cwag_go|gateway_go|gateway_python|gateway_sessiond|gateway_pipelined' --tag "${TAG}" --tag-latest true --project cwf
+           ARTIFACTS="{\"packages\":[\"$DOCKER_REGISTRY/cwag_go:${TAG}\", \"$DOCKER_REGISTRY/gateway_go:${TAG}\", \"$DOCKER_REGISTRY/gateway_python:${TAG}\", \"$DOCKER_REGISTRY/gateway_sessiond:${TAG}\",\"$DOCKER_REGISTRY/gateway_pipelined:${TAG}\"],\"valid\":true}"
+           echo "artifacts=$(echo $ARTIFACTS)" >> $GITHUB_OUTPUT
+
       # Notify ci channel when failing
       # Plugin info: https://github.com/marketplace/actions/slack-notify
       # yamllint enable
@@ -329,21 +364,37 @@ jobs:
         with:
           name: pr
           path: pr/
+      # - name: Create and Push Release Tag
+      #   if: startsWith(github.ref,'refs/heads/v1')  
+      #   run: |
+      #     RELEASE_TAG="${GITHUB_REF_NAME}"
+      #     echo "Creating release tag for version ${RELEASE_TAG}"
+      #     echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+      # - name: Tag and push to Jfrog Registry
+      #   id: publish_artifacts
+      #   if: startsWith(github.ref, 'refs/heads/v1')
+      #   env:
+      #     DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-cwag-test"
+      #     DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
+      #     DOCKER_PASSWORD: "${{ secrets.LF_JFROG_PASSWORD }}"
+      #  
       - name: Create and Push Release Tag
-        if: startsWith(github.ref,'refs/heads/v1')  
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         run: |
           RELEASE_TAG="${GITHUB_REF_NAME}"
           echo "Creating release tag for version ${RELEASE_TAG}"
           echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+
       - name: Tag and push to Jfrog Registry
         id: publish_artifacts
-        if: startsWith(github.ref, 'refs/heads/v1')
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         env:
-          DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-cwag-test"
+          DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-orc8r-test"
           DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
           DOCKER_PASSWORD: "${{ secrets.LF_JFROG_PASSWORD }}"
         run: |
           ./ci-scripts/tag-push-docker.sh --images 'operator' --tag "${TAG}" --tag-latest true --project cwf
+
       # Notify ci channel when failing
       # Plugin info: https://github.com/marketplace/actions/slack-notify
       # yamllint enable
@@ -406,19 +457,34 @@ jobs:
         run: |
           cd ${MAGMA_ROOT}/feg/gateway/docker
           python3 build.py -e
+      # - name: Create and Push Release Tag
+      #   if: startsWith(github.ref,'refs/heads/v1')  
+      #   run: |
+      #     RELEASE_TAG="${GITHUB_REF_NAME}"
+      #     echo "Creating release tag for version ${RELEASE_TAG}"
+      #     echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV  
+      # - name: Tag and push to Jfrog Registry
+      #   id: publish_artifacts
+      #   if: startsWith(github.ref, 'refs/heads/v1')
+      #   env:
+      #     DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-feg-test"
+      #     DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
+      #     DOCKER_PASSWORD: "${{ secrets.LF_JFROG_PASSWORD }}"
       - name: Create and Push Release Tag
-        if: startsWith(github.ref,'refs/heads/v1')  
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         run: |
           RELEASE_TAG="${GITHUB_REF_NAME}"
           echo "Creating release tag for version ${RELEASE_TAG}"
-          echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV  
+          echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+
       - name: Tag and push to Jfrog Registry
         id: publish_artifacts
-        if: startsWith(github.ref, 'refs/heads/v1')
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         env:
-          DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-feg-test"
+          DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-orc8r-test"
           DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
           DOCKER_PASSWORD: "${{ secrets.LF_JFROG_PASSWORD }}"
+        
         run: |
           ./ci-scripts/tag-push-docker.sh --images 'gateway_go|gateway_python' --tag "${TAG}" --tag-latest true --project feg
           ARTIFACTS="{\"packages\":[\"$DOCKER_REGISTRY/gateway_go:${TAG}\", \"$DOCKER_REGISTRY/gateway_python:${TAG}\"],\"valid\":true}"
@@ -467,15 +533,29 @@ jobs:
         run: |
           cd ${MAGMA_ROOT}/nms
           COMPOSE_PROJECT_NAME=magmalte docker compose --compatibility build magmalte
+      # - name: Create and Push Release Tag
+      #   if: startsWith(github.ref, 'refs/heads/v1')  
+      #   run: |
+      #     RELEASE_TAG="${GITHUB_REF_NAME}"
+      #     echo "Creating release tag for version ${RELEASE_TAG}"
+      #     echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV  
+      # - name: Tag and push to Jfrog Registry
+      #   id: publish_artifacts
+      #   if: startsWith(github.ref, 'refs/heads/v1') 
+      #   env:
+      #     DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-orc8r-test"
+      #     DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
+      #     DOCKER_PASSWORD: "${{ secrets.LF_JFROG_PASSWORD }}"
       - name: Create and Push Release Tag
-        if: startsWith(github.ref, 'refs/heads/v1')  
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         run: |
           RELEASE_TAG="${GITHUB_REF_NAME}"
           echo "Creating release tag for version ${RELEASE_TAG}"
-          echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV  
+          echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+
       - name: Tag and push to Jfrog Registry
         id: publish_artifacts
-        if: startsWith(github.ref, 'refs/heads/v1') 
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         env:
           DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-orc8r-test"
           DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
@@ -559,16 +639,30 @@ jobs:
         working-directory: "${{ github.workspace }}/dp"
         run: |
           make _install_skaffold_ci
+      # - name: Create and Push Release Tag
+      #   if: startsWith(github.ref, 'refs/heads/v1')  
+      #   run: |
+      #     RELEASE_TAG="${GITHUB_REF_NAME}"
+      #     echo "Creating release tag for version ${RELEASE_TAG}"
+      #     echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV  
+      # - name: Tag and push to Jfrog Registry
+      #   id: publish_artifacts
+      #   if: startsWith(github.ref, 'refs/heads/v1')
+      #   working-directory: "${{ github.workspace }}/dp"
+      #   env:
+      #     DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-orc8r-test"
+      #     DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
+      #     DOCKER_PASSWORD: "${{ secrets.LF_JFROG_PASSWORD }}"
       - name: Create and Push Release Tag
-        if: startsWith(github.ref, 'refs/heads/v1')  
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         run: |
           RELEASE_TAG="${GITHUB_REF_NAME}"
           echo "Creating release tag for version ${RELEASE_TAG}"
-          echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV  
+          echo "TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+
       - name: Tag and push to Jfrog Registry
         id: publish_artifacts
-        if: startsWith(github.ref, 'refs/heads/v1')
-        working-directory: "${{ github.workspace }}/dp"
+        if: startsWith(github.ref, 'refs/heads/v1') || startsWith(github.ref, 'refs/heads/topic/himabindu/dockerimages')
         env:
           DOCKER_REGISTRY: "linuxfoundation.jfrog.io/magma-docker-orc8r-test"
           DOCKER_USER: "${{ secrets.LF_JFROG_USERNAME }}"
