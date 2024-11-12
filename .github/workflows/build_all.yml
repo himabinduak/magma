@@ -21,11 +21,12 @@ on:
     branches:
       - master
       - 'v1.*'
+      - topic/himabindu/dockerimagespush
   pull_request:
     branches:
       - master
       - 'v1.*'
-      - topic/himabindu/dockerimagespush
+      
     types: [ opened, reopened, synchronize ]
 jobs:
   build_publish_helm_charts:
