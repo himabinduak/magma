@@ -9,7 +9,7 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under the License.
+# limitations under the :License.
 PKGNAME=getenvoy-envoy-dev
 WORK_DIR=/tmp/build-${PKGNAME}
 set -e
@@ -24,4 +24,6 @@ fi
 mkdir "$WORK_DIR"
 cd "$WORK_DIR"
 
-wget https://apt.envoyproxy.io/pool/main/e/envoy-1.28/envoy-1.28_1.28.0_amd64.deb
+#wget https://apt.envoyproxy.io/pool/main/e/envoy-1.28/envoy-1.28_1.28.0_amd64.deb
+wget -O getenvoy-envoy-1.28_1.28.0_amd64.deb  https://apt.envoyproxy.io/pool/main/e/envoy-1.28/envoy-1.28_1.28.0_amd64.deb
+cp *.deb $SCRIPT_DIR/../

@@ -48,3 +48,5 @@ dpkg -i libczmq4_4.2.1-1_amd64.deb libczmq-dev_4.2.1-1_amd64.deb || \
 
 # Re-run apt-get install to fix any other dependency issues if needed
 apt-get install -y libnspr4-dev libnss3-dev || echo "Some dependencies might still be unavailable, check specific requirements."
+
+cp *.deb $SCRIPT_DIR/../

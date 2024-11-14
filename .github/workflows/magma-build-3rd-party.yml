@@ -87,15 +87,12 @@ jobs:
       - name: Test installability of the debian package built
         working-directory: ${{ env.build-directory }}
         run: |
-          if ls *.deb 1> /dev/null 2>&1; then
+          
             sudo apt-get update
             sudo apt-get install --yes --allow-downgrades ./*.deb
-          else
-           echo "No .deb files found for installation"
-          fi
-
-
-
+          
+         
+         
       - name: Verify distribution
         run: |
           if [ ${{ env.distribution }} != 'focal-1.9.0' ] && [[ ! ${{ env.distribution }} =~ ^focal-1\.[0-9]+\.[0-9]+$ ]]; then
